@@ -1,0 +1,93 @@
+version: "3.8"
+
+services:
+
+  elasticsearch_exporter:
+    image: quay.io/prometheuscommunity/elasticsearch-exporter:latest
+    command:
+     - '--es.uri=http://elasticsearch:9200'
+    restart: always
+    ports:
+    - "10.0.0.81:9114:9114"
+    networks:
+      - honeynet
+
+  prometheus:
+    image: prom/prometheus
+    configs:
+      - source: prometheus_config
+        target: /home/dcd-unified/monitor/prometheus/prometheus.yml
+    ports:
+      - target: 9090
+        published: 9090
+        protocol: tcp
+        mode: host 
+    volumes:
+      - ~/dcd-unified/monitor/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - honeynet
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
+    deploy:
+      placement:
+        constraints:
+          - node.labels.role == monitor
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - honeynet
+    
+  node_exporter:
+    image: prom/node-exporter:latest
+    pid: "host"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+    networks:
+      - honeynet
+    deploy:
+      mode: global
+      restart_policy:
+        condition: any
+    ports:
+      - target: 9100
+        published: 9100
+        protocol: tcp
+        mode: host
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - honeynet
+    
+
+configs:
+  prometheus_config:
+    file: ./prometheus/prometheus.yml
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  honeynet:
+    external: true
+

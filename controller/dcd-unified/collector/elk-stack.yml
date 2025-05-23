@@ -1,0 +1,96 @@
+version: "3.8"
+
+services:
+  elasticsearch:
+    image: elasticsearch:7.17.18
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - honeynet
+
+  logstash:
+    image: logstash:7.17.18
+    logging:
+      driver: "json-file"
+      options: 
+        max-size: "50m"
+        max-file: "5"
+    ports:
+      - target: 5044
+        published: 5044
+        protocol: tcp
+        mode: host
+    configs:
+      - source: logstash_conf
+        target: /usr/share/logstash/pipeline/logstash.conf
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - /home/student/dcd-unified/data/cowrie/logs:/home/student/dcd-unified/data/cowrie/logs
+      - /home/student/dcd-unified/data/dionaea/logs:/home/student/dcd-unified/data/dionaea/logs
+    networks:
+      - honeynet
+
+  kibana:
+    image: kibana:7.17.18
+    ports:
+      - "5601:5601"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - honeynet
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.18
+    user: root
+    deploy:
+      mode: global
+    cap_add:
+      - DAC_READ_SEARCH
+    security_opt:
+      - apparmor:unconfined
+    configs:
+      - source: filebeat_config
+        target: /usr/share/filebeat/filebeat.yml
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/hostname:/etc/nodename
+      - /home/student/dcd-unified/data/cowrie/logs:/cowrie_logs:ro
+      - /srv/dionaea/:/srv/dionaea:ro
+    networks:
+      - honeynet
+
+volumes:
+  esdata:
+  
+  
+configs:
+  logstash_conf:
+    file: ./logstash.conf
+  filebeat_config:
+    file: ./filebeat.yml
+
+networks:
+  honeynet:
+    external: true
+

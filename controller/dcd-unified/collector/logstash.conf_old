@@ -1,0 +1,34 @@
+input {
+
+  beats {
+    port => 5044
+    ecs_compatibility => disabled
+  }
+}
+
+filter {
+  if "cowrie" in [container][name] {
+    json {
+      source => "message"
+    }
+    mutate {
+      add_field => { "honeypot" => "cowrie" }
+    }
+  } else if "dionaea" in [container][name] {
+    json {
+      source => "message"
+    }
+    mutate {
+      add_field => { "honeypot" => "dionaea" }
+    }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["http://elasticsearch:9200"]
+    index => "filebeat-%{+YYYY.MM.dd}"
+    ecs_compatibility => disabled
+  }
+  stdout { codec => rubydebug }
+}

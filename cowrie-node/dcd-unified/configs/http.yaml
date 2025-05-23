@@ -1,0 +1,23 @@
+- name: http
+  config:
+    root: "/opt/dionaea/var/dionaea/roots/www"
+    index_file: "index.html"
+    ports:
+      - 80
+    ssl_ports:
+      - 443
+    max_request_size: 32768
+    global_headers:
+      - ["Server", "nginx"]
+    headers:
+      - filename_pattern: ".*\\.html"
+        headers:
+          - ["Content-Type", "text/html; charset=utf-8"]
+          - ["Content-Length", "{content_length}"]
+          - ["Connection", "{connection}"]
+          - ["X-Powered-By", "PHP/5.6"]
+      - filename_pattern: ".*"
+        headers:
+          - ["Content-Type", "text/plain"]
+          - ["Content-Length", "{content_length}"]
+

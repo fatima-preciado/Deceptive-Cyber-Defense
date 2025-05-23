@@ -1,0 +1,24 @@
+# TO RUN: docker stack deploy -c tanner-stack.yml tanner
+version: "3.8"
+
+services:
+  honeypot_tanner_triggered:
+    image: ghcr.io/telekom-security/tanner:24.04.1
+    command: [ "sh", "-c", "mkdir -p /tmp/tanner && tanner" ]
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+    networks:
+      - honeynet
+    logging:
+      driver: "json-file"
+    restart: always
+    extra_hosts:
+      - "tanner:127.0.0.1"
+
+networks:
+  honeynet:
+    external: true

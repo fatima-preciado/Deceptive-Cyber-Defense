@@ -1,0 +1,32 @@
+# TO RUN: docker stack deploy -c cowrie-stack.yml cowrie
+version: "3.8"
+
+services:
+  cowrie:
+    image: cowrie/cowrie:latest
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+    ports:
+      - target: 2222 # inside the container
+        published: 2222 # host that the attackers will hit
+        protocol: tcp
+        mode: host
+    volumes:
+      - /home/student/dcd-unified/data/cowrie/logs:/cowrie/cowrie-git/var/log
+      - /home/student/dcd-unified/data/cowrie:/cowrie/data
+      - /home/student/dcd-unified/data/cowrie/honeyfs:/cowrie/honeyfs
+      - /home/student/dcd-unified/data/cowrie/fs.pickle:/cowrie/cowrie-git/share/cowrie/fs.pickle 
+      - /home/student/dcd-unified/data/cowrie/bait:/cowrie-fs/home/root:ro
+      - /home/student/dcd-unified/data/cowrie/bait:/cowrie-fs/home/phil:ro
+      - /home/student/dcd-unified/data/cowrie/bait:/home/root:ro
+      - /home/student/dcd-unified/data/cowrie/bait:/home/phil:ro
+    networks:
+      - honeynet
+
+networks:
+  honeynet:
+    external: true

@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.18
+    deploy:
+      mode: replicated
+      replicas: 3
+    user: root
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /home/student/dcd-unified/data/cowrie/logs:/home/student/dcd-unified/data/cowrie/logs:ro
+      - /srv/dionaea:/srv/dionaea:ro 
+    networks:
+      - honeynet
+    command: ["--strict.perms=false"]
+    depends_on:
+      - logstash
+    environment:
+      - ELASTICSEARCH_HOST=elk_elasticsearch
+      - LOGSTASH_HOST=elk_logstash
+
+networks:
+  honeynet:
+    external: true
+    name: honeynet
+
