@@ -1,89 +1,198 @@
+# Deceptive Cyber Defense (Senior Project)
+
+A dynamic deception-based cybersecurity platform that deploys Dockerized honeypots across a multi-node architecture. This system infers attacker behavior and cognitive bias, then adapts honeypot deployment accordingly using automated orchestration and threat monitoring tools.
+
+---
+
+## Key Features
+
 * **Dockerized honeypots** (Cowrie, Dionaea)
 * **Cognitive bias exploitation** (anchoring, confirmation, overconfidence)
 * **ELK Stack integration** (Elasticsearch, Logstash, Kibana)
 * **Dynamic response scripting** (`dynamic_response.py`, `cognitive_deployer.py`)
 * **Prometheus metrics**
-* **Proxmox VM snapshots and Swarm node management**
-* **Security deception and attacker engagement (EvilEVE)**
+* **Proxmox VM snapshots and Docker Swarm management**
+* **Security deception and attacker simulation via EvilEVE**
 
-# General Project Information
+---
 
-## Group Members
+## 👥 Group Members
 
-* Alex Bockheim - [bockhea@wwu.edu](mailto:bockhea@wwu.edu)
-* Fatima Preciado - [preciaf@wwu.edu](mailto:preciaf@wwu.edu)
-* Lauren Hall - [halll24@wwu.edu](mailto:halll24@wwu.edu)
-* Tristan Davis - [davist32@wwu.edu](mailto:davist32@wwu.edu)
+* Alex Bockheim – [bockhea@wwu.edu](mailto:bockhea@wwu.edu)
+* Fatima Preciado – [preciaf@wwu.edu](mailto:preciaf@wwu.edu)
+* Lauren Hall – [halll24@wwu.edu](mailto:halll24@wwu.edu)
+* Tristan Davis – [davist32@wwu.edu](mailto:davist32@wwu.edu)
 
-## Resources In Use
+---
+
+## 🧱 Resources In Use
 
 * T-Pot Honeypot Framework
 * Cowrie & Dionaea honeypots
-* Docker Swarm for orchestration
+* Docker Swarm
 * ELK Stack (Elasticsearch, Logstash, Kibana)
-* Prometheus for monitoring
+* Prometheus
 * EvilEVE Attacker Simulation Toolkit
 * GitLab CI/CD
-* Proxmox virtualization environment
+* Proxmox Virtualization Environment
 
-## Project Outcome
+---
 
-We developed a dynamic deceptive cybersecurity system that adapts honeypot deployments based on attacker behavior, logging their interactions and inferring cognitive biases to optimize future deception strategies.
+## 🌟 Project Outcome
 
-# Project Background & Motivations
+We developed a modular deception environment that:
 
-## Previous Projects
+* Deploys containerized honeypots across nodes
+* Analyzes attacker behavior in real time
+* Uses dynamic logic to infer and exploit cognitive biases
+* Logs, visualizes, and simulates attacker interaction across nodes
 
-This project expands on standard honeypot systems by adding adaptive behavior, attacker profiling, and deception-aware logging, building on concepts from prior security operations and threat analysis labs.
+---
 
-## Project Focus
+## 📁 Project Structure
 
-* **Motivating factors**: Traditional honeypots are often too easily detected and dismissed by attackers. We sought to make deception more convincing and adaptive.
-* **Goals of the project**: Detect attacker behavior patterns, exploit cognitive biases to retain attacker engagement, and automate honeypot response mechanisms.
+```
+project-root/
+├── controller/          # Swarm manager setup, ELK, Prometheus configs
+├── cowrie-node/         # Cowrie honeypot service config
+├── dionaea-node/        # Dionaea honeypot service config
+├── README.md            # Project overview and deployment instructions
+```
 
-## Vision Statement
+---
 
-To create an intelligent deception platform that not only logs attacker behavior but subtly manipulates it—gathering intelligence while wasting attacker time and resources.
+## Deployment Instructions
 
-# Deliverables & Outcome
+### 1. Create Docker Network (run once)
 
-## Technology Utilized
+```bash
+docker network create --driver overlay --attachable honeynet
+```
 
-* **Cowrie** for SSH/Telnet interaction traps
-* **Dionaea** for emulating vulnerable services (FTP, HTTP, etc.)
-* **Docker & Swarm** for scalable deployment
-* **ELK Stack** for log aggregation and visualization
-* **Prometheus** for performance metrics
-* **Python** for dynamic response scripting
-* **FastAPI** for management endpoints
+---
 
-## Major Features
+### 2. Deploy ELK Stack
 
-* Real-time log analysis and attacker categorization
-* Automated honeypot orchestration based on cognitive bias inference
-* Elasticsearch integration for searchable attacker logs
-* Kibana dashboards for behavior analysis
-* Support for attacker simulation via EvilEVE
+```bash
+cd controller/
+docker stack deploy -c elk-stack.yml elk
+docker service ls
+```
+
+---
+
+### 3. Deploy Honeypots
+
+```bash
+cd /sensor/
+
+docker stack deploy -c cowrie-stack.yml cowrie
+docker stack deploy -c dionaea-stack.yml dionea
+
+docker service ls
+```
+
+---
+
+### 4. Deploy Monitoring Stack
+
+```bash
+cd controller/
+docker stack rm monitor
+docker stack deploy -c docker-compose.monitor.yml monitor
+docker service ls
+```
+
+---
+
+### 5. Restart Dynamic Services
+
+```bash
+sudo systemctl restart cognitive-deployer.service
+sudo systemctl restart dynamic-response.service
+```
+
+---
+
+### 6. Check Service Health
+
+```bash
+systemctl status cognitive-deployer
+systemctl status dynamic-response
+```
+
+---
+
+## Simulate Attacks (EvilEVE)
+
+Run from the simulation VM:
+
+```bash
+cd ~/evileve
+python3 simulation.py --name testreal --ip 10.0.0.82 --phases 5
+python3 analyze_phase_log.py
+```
+
+---
+
+## Extra Items
+
+* **Infrastructure Inventory List** is provided in `controller/infrastructure-inventory.md`, which includes:
+
+  * Usernames and passwords
+  * SSH keys
+  * Access methods (SSH, RDP, HTTP)
+  * IP addresses and service names
+
+* **Deployment Diagram** is included as `controller/deployment-diagram.png`
+
+* **This README** includes full documentation for running the project
+
+---
 
 ## Project Architecture
 
-* **Frontend**: Kibana dashboards
+* **Frontend**: Kibana Dashboards
 * **Backend**: Filebeat → Logstash → Elasticsearch → Kibana
-* **Orchestration**: Docker Swarm managing honeypots across nodes
-* **Logic**: Python scripts (`dynamic_response.py`, `cognitive_deployer.py`) parsing honeypot logs and scaling containers based on attacker profiles
+* **Orchestration**: Docker Swarm across multiple VMs
+* **Dynamic Logic**: Python scripts infer attacker bias and scale honeypot services accordingly
+
+---
+
+## Project Focus
+
+### Motivation
+
+Traditional honeypots are often too simplistic and are quickly identified by attackers. This project aims to create more believable and adaptive honeypot environments by integrating psychological profiling and real-time orchestration.
+
+### Goals
+
+* Detect and interpret attacker behavior patterns
+* Exploit cognitive biases such as anchoring and overconfidence
+* Retain attacker engagement and waste adversary resources
+* Provide searchable, centralized logs and real-time dashboards
+
+---
 
 ## Project Achievements
 
-* Successfully deployed a deception system that detects anchoring, confirmation, and overconfidence biases
-* Demonstrated attacker misdirection through cognitive manipulation
-* Built a resilient, multi-node infrastructure supporting adaptive honeypot behavior
-* Validated logging and alerting through ELK
+* Successfully deployed and scaled honeypots across multiple VMs
+* Detected attacker behavior patterns and inferred cognitive biases
+* Demonstrated real-time deception and misdirection strategies
+* Validated end-to-end log aggregation and monitoring via ELK
 
-## Areas for Future Work
+---
 
-* Deeper integration with machine learning for attacker profiling
-* Activly monitor attackers and change the honeypot based on their decsions
-* Expand deception types (e.g., honeytokens, fake credentials)
-* Deploy on cloud infrastructure for scalability testing
-* Enhance UI with real-time visual overlays of attacker paths
-* Develop custom simulations beyond EvilEVE for varied attacker personas
+## Future Work
+
+* Integrate machine learning models for attacker classification
+* Add honeytokens and more complex fake services
+* Deploy in cloud infrastructure for broader testing
+* Build an attacker movement UI overlay in real time
+* Expand EvilEVE simulation personas for greater realism
+
+---
+
+## License
+
+This project was developed as a senior capstone project for the Computer Science Department at Western Washington University and is intended for academic and educational use.
