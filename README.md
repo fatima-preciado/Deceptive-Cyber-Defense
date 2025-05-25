@@ -16,7 +16,7 @@ A dynamic deception-based cybersecurity platform that deploys Dockerized honeypo
 
 ---
 
-## 👥 Group Members
+## Group Members
 
 * Alex Bockheim – [bockhea@wwu.edu](mailto:bockhea@wwu.edu)
 * Fatima Preciado – [preciaf@wwu.edu](mailto:preciaf@wwu.edu)
@@ -25,7 +25,7 @@ A dynamic deception-based cybersecurity platform that deploys Dockerized honeypo
 
 ---
 
-## 🧱 Resources In Use
+## Resources In Use
 
 * T-Pot Honeypot Framework
 * Cowrie & Dionaea honeypots
@@ -38,7 +38,7 @@ A dynamic deception-based cybersecurity platform that deploys Dockerized honeypo
 
 ---
 
-## 🌟 Project Outcome
+## Project Outcome
 
 We developed a modular deception environment that:
 
@@ -49,7 +49,7 @@ We developed a modular deception environment that:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 project-root/
