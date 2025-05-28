@@ -56,6 +56,7 @@ project-root/
 ├── controller/          # Swarm manager setup, ELK, Prometheus configs
 ├── cowrie-node/         # Cowrie honeypot service config
 ├── dionaea-node/        # Dionaea honeypot service config
+├── evileve/             # Simulate attacks
 ├── README.md            # Project overview and deployment instructions
 ```
 
